@@ -106,7 +106,14 @@ const ChapterDetail: React.FC<ChapterDetailProps> = ({ chapter, dayIndex, onBack
                                     size="sm"
                                     variant="outline"
                                     className="flex-shrink-0"
-                                    onClick={() => window.open(resource.url, '_blank')}
+                                    onClick={() => {
+                                        if (type === 'test') {
+                                            const url = `/student/test-window?category=zero-to-hero&examId=${resource.id}&testId=${resource.id}`;
+                                            window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+                                        } else {
+                                            window.open(resource.url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+                                        }
+                                    }}
                                 >
                                     {type === 'video' && <PlayCircle className="h-4 w-4 mr-1" />}
                                     {type === 'video' ? 'Watch' : type === 'test' ? 'Take Test' : 'View'}

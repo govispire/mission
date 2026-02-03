@@ -8,7 +8,8 @@ import {
   FileText, Lightbulb, BarChart2, Heart, FileQuestion,
   HelpCircle, Upload, Eye, CheckCircle, Users, Bell,
   PieChart, CreditCard, Settings, UserCheck, MessageSquare,
-  Target, Clock, TrendingUp, Gift, Flame, Trophy, Star, Award, Lock, Shield
+  Target, Clock, TrendingUp, Gift, Flame, Trophy, Star, Award, Lock, Shield,
+  Sparkles, FileEdit
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -242,6 +243,8 @@ const Sidebar: React.FC<SidebarProps> = ({ role, basePath, collapsed }) => {
           { icon: <Users size={18} />, label: 'Manage All Users', to: `${basePath}/manage-users` },
           { icon: <CreditCard size={18} />, label: 'Payment/Plans', to: `${basePath}/payment-plans` },
           { icon: <BarChart2 size={18} />, label: 'View Analytics', to: `${basePath}/analytics` },
+          { icon: <Sparkles size={18} />, label: 'Create AI Blog', to: `${basePath}/create-blog`, highlight: true },
+          { icon: <FileEdit size={18} />, label: 'Manage Blogs', to: `${basePath}/manage-blogs` },
         ];
       case 'owner':
         return [

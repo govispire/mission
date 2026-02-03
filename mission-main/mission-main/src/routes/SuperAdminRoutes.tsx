@@ -8,6 +8,8 @@ import CreateAdmins from '@/pages/superadmin/CreateAdmins';
 import ManageUsers from '@/pages/superadmin/ManageUsers';
 import PaymentPlans from '@/pages/superadmin/PaymentPlans';
 import SuperAdminAnalytics from '@/pages/superadmin/SuperAdminAnalytics';
+import AIBlogCreator from '@/pages/superadmin/AIBlogCreator';
+import BlogManager from '@/pages/superadmin/BlogManager';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import NotFound from '@/pages/NotFound';
 
@@ -22,6 +24,8 @@ const SuperAdminRoutes = () => {
           <Route path="/manage-users" element={<ManageUsers />} />
           <Route path="/payment-plans" element={<PaymentPlans />} />
           <Route path="/analytics" element={<SuperAdminAnalytics />} />
+          <Route path="/create-blog" element={<AIBlogCreator />} />
+          <Route path="/manage-blogs" element={<BlogManager />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Route>

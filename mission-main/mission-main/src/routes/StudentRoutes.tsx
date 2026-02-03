@@ -35,11 +35,14 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import NotFound from '@/pages/NotFound';
 import ExamWindow from '@/pages/student/ExamWindow';
 
+import TestWindow from '@/pages/student/TestWindow';
+
 const StudentRoutes = () => {
   return (
     <Routes>
-      {/* Exam window - outside ProtectedRoute for new window compatibility */}
+      {/* Exam windows - outside ProtectedRoute for new window compatibility */}
       <Route path="/exam-window" element={<ExamWindow />} />
+      <Route path="/test-window" element={<TestWindow />} />
 
       <Route element={<ProtectedRoute allowedRoles={['student']} />}>
         {/* Standalone pages */}

@@ -1,16 +1,24 @@
-import React, { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ExamInstructions } from '@/components/student/exam/ExamInstructions';
 import { ExamInterface } from '@/components/student/exam/ExamInterface';
+import { TestAnalysisModal } from '@/components/student/exam/TestAnalysisModal';
+import { TestSolutions } from '@/components/student/exam/TestSolutions';
 import { ExamConfig } from '@/types/exam';
 import { getQuestionsForQuiz } from '@/data/quizQuestionsData';
+import { generateAnalysisFromExam } from '@/utils/examAnalysis';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 // This is a standalone fullscreen exam page that opens in a new window
 const ExamWindow = () => {
     const [searchParams] = useSearchParams();
-    const [showInstructions, setShowInstructions] = React.useState(true);
-    const [startTime] = React.useState(Date.now());
+    const navigate = useNavigate();
+    const [phase, setPhase] = useState<'instructions' | 'exam' | 'analysis' | 'solutions'>('instructions');
+    const [startTime] = useState(Date.now());
+    const [examResponses, setExamResponses] = useState<Record<string, string | string[] | null>>({});
+    const [analysisData, setAnalysisData] = useState<any>(null);
 
     // Get quiz data from URL parameters
     const quizId = searchParams.get('quizId') || '';
@@ -18,6 +26,8 @@ const ExamWindow = () => {
     const subject = searchParams.get('subject') || 'General';
     const duration = parseInt(searchParams.get('duration') || '30');
     const questionCount = parseInt(searchParams.get('questions') || '10');
+    const mode = searchParams.get('mode'); // 'solution' mode to directly show solutions
+    const returnUrl = searchParams.get('returnUrl') || '/student/daily-quizzes'; // Default to daily quizzes
 
     // Enter fullscreen on mount
     useEffect(() => {
@@ -28,11 +38,15 @@ const ExamWindow = () => {
                 console.log('Fullscreen not supported or denied');
             }
         };
-        enterFullscreen();
+
+        // Only enter fullscreen if not in solution mode
+        if (mode !== 'solution') {
+            enterFullscreen();
+        }
 
         // Prevent accidental navigation
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (!showInstructions) {
+            if (phase === 'exam') {
                 e.preventDefault();
                 e.returnValue = 'Are you sure you want to leave the exam?';
             }
@@ -40,7 +54,18 @@ const ExamWindow = () => {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [showInstructions]);
+    }, [phase, mode]);
+
+    // If in solution mode, load previous responses and go directly to solutions
+    useEffect(() => {
+        if (mode === 'solution') {
+            const storedResponses = localStorage.getItem(`quiz_responses_${quizId}`);
+            if (storedResponses) {
+                setExamResponses(JSON.parse(storedResponses));
+                setPhase('solutions');
+            }
+        }
+    }, [mode, quizId]);
 
     // Get questions
     const questions = getQuestionsForQuiz(subject, questionCount);
@@ -80,6 +105,13 @@ const ExamWindow = () => {
     const handleSubmit = (responses: Record<string, string | string[] | null>) => {
         const timeTaken = Math.floor((Date.now() - startTime) / 1000);
 
+        // Store responses for solution viewer
+        setExamResponses(responses);
+        localStorage.setItem(`quiz_responses_${quizId}`, JSON.stringify(responses));
+
+        // Generate comprehensive analysis data
+        const analysis = generateAnalysisFromExam(examConfig, responses);
+
         let correctCount = 0;
         let incorrectCount = 0;
         let notAttempted = 0;
@@ -118,36 +150,103 @@ const ExamWindow = () => {
 
         localStorage.setItem('exam_result_' + quizId, JSON.stringify(result));
 
-        toast.success('Exam Submitted Successfully!', {
-            description: `Score: ${score}% | Correct: ${correctCount} | Wrong: ${incorrectCount}`
+        // Store in quiz completions immediately
+        const completions = JSON.parse(localStorage.getItem('quizCompletions') || '{}');
+        completions[quizId] = {
+            completed: true,
+            score,
+            date: new Date().toISOString()
+        };
+        localStorage.setItem('quizCompletions', JSON.stringify(completions));
+
+        toast.success('Quiz Completed Successfully!', {
+            description: `Score: ${score}% | Correct: ${correctCount} | Wrong: ${incorrectCount}`,
+            duration: 3000
         });
 
-        // Exit fullscreen and close window
+        // Exit fullscreen
         if (document.fullscreenElement) {
             document.exitFullscreen();
         }
 
-        setTimeout(() => {
-            window.close();
-        }, 2000);
+        // Move to analysis phase instead of redirecting
+        setAnalysisData(analysis);
+        setPhase('analysis');
     };
 
-    if (showInstructions) {
+    const handleCloseAnalysis = () => {
+        // Navigate back to the page where quiz was started
+        window.location.href = returnUrl;
+    };
+
+    const handleViewSolutions = () => {
+        setPhase('solutions');
+    };
+
+    const handleCloseSolutions = () => {
+        // Return to analysis
+        setPhase('analysis');
+    };
+
+    // Render based on phase
+    if (phase === 'instructions') {
         return (
             <ExamInstructions
                 examConfig={examConfig}
-                onComplete={() => setShowInstructions(false)}
+                onComplete={() => setPhase('exam')}
             />
         );
     }
 
-    return (
-        <ExamInterface
-            examConfig={examConfig}
-            onSubmit={handleSubmit}
-            userName="Student"
-        />
-    );
+    if (phase === 'exam') {
+        return (
+            <ExamInterface
+                examConfig={examConfig}
+                onSubmit={handleSubmit}
+                userName="Student"
+            />
+        );
+    }
+
+    if (phase === 'analysis' && analysisData) {
+        return (
+            <div className="fixed inset-0 overflow-hidden bg-black/50 z-50">
+                <TestAnalysisModal
+                    isOpen={true}
+                    onClose={handleCloseAnalysis}
+                    analysisData={analysisData}
+                    onViewSolutions={handleViewSolutions}
+                />
+            </div>
+        );
+    }
+
+    if (phase === 'solutions') {
+        return (
+            <div className="min-h-screen bg-background">
+                {/* Back button */}
+                <div className="sticky top-0 z-10 bg-background border-b p-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCloseSolutions}
+                        className="gap-2"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Analysis
+                    </Button>
+                </div>
+                <TestSolutions
+                    examConfig={examConfig}
+                    responses={examResponses}
+                    isOpen={true}
+                    onClose={handleCloseSolutions}
+                />
+            </div>
+        );
+    }
+
+    return null;
 };
 
 export default ExamWindow;

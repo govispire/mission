@@ -43,13 +43,13 @@ const EnhancedTestTypeGrid: React.FC<EnhancedTestTypeGridProps> = ({ tests, test
   const [selectedTestForAnalysis, setSelectedTestForAnalysis] = useState<TestItem | null>(null);
   const { isTestBookmarked, toggleBookmark } = useBookmarkedTests();
 
-  const filteredTests = tests.filter(test => 
+  const filteredTests = tests.filter(test =>
     selectedSubject === 'all' || test.subject === selectedSubject
   );
 
   const handleTestAction = (action: 'solution' | 'reattempt' | 'analysis', test: TestItem) => {
     console.log(`${action} clicked for test ${test.id}`);
-    
+
     if (action === 'analysis') {
       setSelectedTestForAnalysis(test);
       setShowAnalysisModal(true);
@@ -77,7 +77,7 @@ const EnhancedTestTypeGrid: React.FC<EnhancedTestTypeGridProps> = ({ tests, test
       category: test.category,
       addedAt: Date.now()
     };
-    
+
     const isBookmarked = toggleBookmark(bookmarkData);
     toast({
       title: isBookmarked ? "Test Bookmarked" : "Bookmark Removed",
@@ -136,26 +136,34 @@ const EnhancedTestTypeGrid: React.FC<EnhancedTestTypeGridProps> = ({ tests, test
             </Badge>
           )}
         </div>
-        
+
         <div className={`${isListView ? 'flex gap-2' : 'flex flex-col gap-2'}`}>
           {getTestStatus(test) === 'not-started' ? (
-            <Link to={`/student/tests/${test.category}/${test.id}/exam`}>
-              <Button className="w-full">
-                <Play className="h-4 w-4 mr-2" />
-                Start Test
-              </Button>
-            </Link>
+            <Button
+              className="w-full"
+              onClick={() => {
+                const url = `/student/test-window?category=${test.category}&examId=${test.id}&testId=${test.id}`;
+                window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+              }}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Start Test
+            </Button>
           ) : getTestStatus(test) === 'paused' ? (
-            <Link to={`/student/tests/${test.category}/${test.id}/exam`}>
-              <Button className="w-full">
-                <Play className="h-4 w-4 mr-2" />
-                Continue
-              </Button>
-            </Link>
+            <Button
+              className="w-full"
+              onClick={() => {
+                const url = `/student/test-window?category=${test.category}&examId=${test.id}&testId=${test.id}`;
+                window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+              }}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Continue
+            </Button>
           ) : (
             <div className={`${isListView ? 'flex gap-2' : 'space-y-2'}`}>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => handleTestAction('solution', test)}
                 className="flex items-center gap-1"
@@ -163,8 +171,8 @@ const EnhancedTestTypeGrid: React.FC<EnhancedTestTypeGridProps> = ({ tests, test
                 <BookOpen className="h-4 w-4" />
                 Solution
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => handleTestAction('analysis', test)}
                 className="flex items-center gap-1"
@@ -172,10 +180,13 @@ const EnhancedTestTypeGrid: React.FC<EnhancedTestTypeGridProps> = ({ tests, test
                 <BarChart3 className="h-4 w-4" />
                 Analysis
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
-                onClick={() => handleTestAction('reattempt', test)}
+                onClick={() => {
+                  const url = `/student/test-window?category=${test.category}&examId=${test.id}&testId=${test.id}`;
+                  window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+                }}
                 className="flex items-center gap-1"
               >
                 <RotateCcw className="h-4 w-4" />
@@ -227,7 +238,7 @@ const EnhancedTestTypeGrid: React.FC<EnhancedTestTypeGridProps> = ({ tests, test
               </TabsTrigger>
             ))}
           </TabsList>
-          
+
           {subjects.map(subject => (
             <TabsContent key={subject.id} value={subject.id} className="mt-4">
               {viewMode === 'grid' ? (

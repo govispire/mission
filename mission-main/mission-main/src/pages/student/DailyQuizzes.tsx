@@ -49,6 +49,31 @@ const FreeQuizzes = () => {
     }));
   });
 
+  // Refresh quiz data when component mounts (e.g., after returning from exam)
+  useEffect(() => {
+    const completions = getQuizCompletions();
+    setQuizzes(dailyQuizzes.map(q => ({
+      ...q,
+      completed: !!completions[q.id],
+      score: completions[q.id]?.score
+    })));
+  }, []);
+
+  // Refresh quiz data when window regains focus (user returns from exam window)
+  useEffect(() => {
+    const handleFocus = () => {
+      const completions = getQuizCompletions();
+      setQuizzes(dailyQuizzes.map(q => ({
+        ...q,
+        completed: !!completions[q.id],
+        score: completions[q.id]?.score
+      })));
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   const [streakData, setStreakData] = useState(() => calculateStreakData());
   const [weakAreas, setWeakAreas] = useState(() => {
     const completions = getQuizCompletions();
@@ -136,13 +161,14 @@ const FreeQuizzes = () => {
       toast.error('This quiz is scheduled for the future!');
       return;
     }
-    // Launch exam in new fullscreen window
+    // Launch exam in new fullscreen window with return URL
     launchExamWindow({
       quizId: quiz.id,
       title: quiz.title,
       subject: quiz.subject,
       duration: quiz.duration,
       questions: quiz.questions,
+      returnUrl: '/student/daily-quizzes', // Return to daily quizzes page
     });
   };
 

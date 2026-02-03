@@ -9,10 +9,11 @@ interface ExamLaunchParams {
     subject: string;
     duration: number;
     questions: number;
+    returnUrl?: string; // URL to return to after completing quiz
 }
 
 export const launchExamWindow = (params: ExamLaunchParams) => {
-    const { quizId, title, subject, duration, questions } = params;
+    const { quizId, title, subject, duration, questions, returnUrl } = params;
 
     // Build URL with query parameters
     const urlParams = new URLSearchParams({
@@ -23,6 +24,11 @@ export const launchExamWindow = (params: ExamLaunchParams) => {
         questions: questions.toString(),
     });
 
+    // Add return URL if provided
+    if (returnUrl) {
+        urlParams.set('returnUrl', returnUrl);
+    }
+
     const examUrl = `/student/exam-window?${urlParams.toString()}`;
 
     // Open in new window with specific dimensions
@@ -32,32 +38,9 @@ export const launchExamWindow = (params: ExamLaunchParams) => {
     if (examWindow) {
         examWindow.focus();
 
-        // Listen for exam completion
-        const checkResult = setInterval(() => {
-            const result = localStorage.getItem('exam_result_' + quizId);
-            if (result) {
-                clearInterval(checkResult);
-                localStorage.removeItem('exam_result_' + quizId);
-
-                // Trigger callback or refresh parent page
-                const parsedResult = JSON.parse(result);
-
-                // Store in quiz completions
-                const completions = JSON.parse(localStorage.getItem('quizCompletions') || '{}');
-                completions[quizId] = {
-                    completed: true,
-                    score: parsedResult.score,
-                    date: new Date().toISOString()
-                };
-                localStorage.setItem('quizCompletions', JSON.stringify(completions));
-
-                // Reload parent page to show updated status
-                window.location.reload();
-            }
-        }, 1000);
-
-        // Clear interval if window is closed without completion
-        setTimeout(() => clearInterval(checkResult), duration * 60 * 1000 + 60000);
+        // Note: The child window (ExamWindow/TestWindow) now handles its own navigation
+        // after completion, so we don't need to monitor or navigate the parent window.
+        // The parent window stays on the current page and will refresh when user returns.
     } else {
         alert('Please allow popups for this website to start the exam');
     }

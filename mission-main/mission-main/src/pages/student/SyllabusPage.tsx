@@ -897,7 +897,14 @@ const SyllabusPage = () => {
                             <span>{test.duration}</span>
                           </div>
                         </div>
-                        <Button className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700">
+                        <Button
+                          className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700"
+                          onClick={() => {
+                            // Open test in new window with proper parameters
+                            const url = `/student/test-window?category=syllabus&examId=${selectedExam}&testId=${test.id}`;
+                            window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+                          }}
+                        >
                           Take Test
                         </Button>
                       </div>

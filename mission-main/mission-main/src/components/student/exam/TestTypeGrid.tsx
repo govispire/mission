@@ -24,11 +24,11 @@ interface TestTypeGridProps {
   viewMode?: 'grid' | 'list';
 }
 
-export const TestTypeGrid: React.FC<TestTypeGridProps> = ({ 
-  testType, 
-  tests, 
-  progress, 
-  viewMode = 'grid' 
+export const TestTypeGrid: React.FC<TestTypeGridProps> = ({
+  testType,
+  tests,
+  progress,
+  viewMode = 'grid'
 }) => {
   const { category, examId } = useParams();
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
@@ -138,21 +138,21 @@ export const TestTypeGrid: React.FC<TestTypeGridProps> = ({
                       {test.score !== undefined ? `${test.score}/${test.maxScore}` : `0/${test.maxScore}`}
                     </p>
                   </div>
-                  
+
                   {test.timeSpent && (
                     <div className="text-center">
                       <p className="text-gray-500 text-xs">Time</p>
                       <p className="font-medium">{Math.floor(test.timeSpent / 60)}m</p>
                     </div>
                   )}
-                  
+
                   {test.rank && (
                     <div className="text-center">
                       <p className="text-gray-500 text-xs">Rank</p>
                       <p className="font-medium text-yellow-600">#{test.rank}</p>
                     </div>
                   )}
-                  
+
                   <div className="text-center">
                     <p className="text-gray-500 text-xs">Attempts</p>
                     <p className="font-medium">{test.attempts}</p>
@@ -162,8 +162,8 @@ export const TestTypeGrid: React.FC<TestTypeGridProps> = ({
                 <div className="flex gap-2">
                   {test.status === 'completed' ? (
                     <>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => handleSolutionClick(test)}
                         className="flex items-center gap-1"
@@ -171,31 +171,42 @@ export const TestTypeGrid: React.FC<TestTypeGridProps> = ({
                         <BookOpen className="h-3 w-3" />
                         Solution
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => handleAnalysisClick(test)}
                         className="flex items-center gap-1"
                       >
                         <BarChart3 className="h-3 w-3" />
                         Analysis
                       </Button>
-                      <Link to={`/student/tests/${category}/${examId}/exam`}>
-                        <Button size="sm" variant="outline">
-                          Reattempt
-                        </Button>
-                      </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const currentPath = window.location.pathname;
+                          const url = `/student/test-window?category=${category}&examId=${examId}&testId=${test.testId}&returnUrl=${encodeURIComponent(currentPath)}`;
+                          window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+                        }}
+                      >
+                        Reattempt
+                      </Button>
                     </>
                   ) : (
-                    <Link to={`/student/tests/${category}/${examId}/exam`}>
-                      <Button size="sm">
-                        {test.status === 'in-progress' ? 'Continue' : 'Start Test'}
-                      </Button>
-                    </Link>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const currentPath = window.location.pathname;
+                        const url = `/student/test-window?category=${category}&examId=${examId}&testId=${test.testId}&returnUrl=${encodeURIComponent(currentPath)}`;
+                        window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+                      }}
+                    >
+                      {test.status === 'in-progress' ? 'Continue' : 'Start Test'}
+                    </Button>
                   )}
                 </div>
               </div>
-              
+
               {test.score !== undefined && (
                 <div className="mt-3 pt-3 border-t">
                   <Progress value={(test.score / test.maxScore) * 100} className="h-2" />
@@ -312,18 +323,18 @@ export const TestTypeGrid: React.FC<TestTypeGridProps> = ({
                 {test.status === 'completed' ? (
                   <div className="space-y-2">
                     <div className="flex gap-1">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => handleSolutionClick(test)}
                         className="flex-1 text-xs"
                       >
                         <BookOpen className="h-3 w-3 mr-1" />
                         Solution
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => handleAnalysisClick(test)}
                         className="flex-1 text-xs"
                       >
@@ -331,18 +342,31 @@ export const TestTypeGrid: React.FC<TestTypeGridProps> = ({
                         Analysis
                       </Button>
                     </div>
-                    <Link to={`/student/tests/${category}/${examId}/exam`} className="block">
-                      <Button size="sm" variant="outline" className="w-full text-xs">
-                        Reattempt
-                      </Button>
-                    </Link>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs"
+                      onClick={() => {
+                        const currentPath = window.location.pathname;
+                        const url = `/student/test-window?category=${category}&examId=${examId}&testId=${test.testId}&returnUrl=${encodeURIComponent(currentPath)}`;
+                        window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+                      }}
+                    >
+                      Reattempt
+                    </Button>
                   </div>
                 ) : (
-                  <Link to={`/student/tests/${category}/${examId}/exam`} className="block">
-                    <Button size="sm" className="w-full text-xs">
-                      {test.status === 'in-progress' ? 'Continue' : 'Start Test'}
-                    </Button>
-                  </Link>
+                  <Button
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => {
+                      const currentPath = window.location.pathname;
+                      const url = `/student/test-window?category=${category}&examId=${examId}&testId=${test.testId}&returnUrl=${encodeURIComponent(currentPath)}`;
+                      window.open(url, '_blank', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+                    }}
+                  >
+                    {test.status === 'in-progress' ? 'Continue' : 'Start Test'}
+                  </Button>
                 )}
               </div>
             </div>

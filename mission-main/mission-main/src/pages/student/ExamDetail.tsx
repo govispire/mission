@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -21,7 +20,7 @@ const ExamDetail = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [activeSubTab, setActiveSubTab] = useState("full");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { progressData, getTypeProgress, setProgressData } = useExamProgress(examId!);
+  const { progressData, getTypeProgress, setProgressData, updateTestProgress } = useExamProgress(examId!);
 
   // Get exam name from examData
   const examName = React.useMemo(() => {
@@ -29,6 +28,75 @@ const ExamDetail = () => {
     const exam = exams.find(e => e.id === examId);
     return exam?.name || examId?.replace('-', ' ').toUpperCase() || 'Exam';
   }, [category, examId]);
+
+  // Check for test completions on mount and update progress
+  useEffect(() => {
+    const checkTestCompletions = () => {
+      // Check all test types for completions
+      Object.keys(progressData.testTypes).forEach((testType) => {
+        const tests = progressData.testTypes[testType as keyof typeof progressData.testTypes];
+        tests.forEach((test) => {
+          const resultKey = `test_result_${test.testId}`;
+          const resultStr = localStorage.getItem(resultKey);
+          if (resultStr) {
+            try {
+              const result = JSON.parse(resultStr);
+              // Update test progress if it's newly completed
+              if (test.status !== 'completed' || test.score !== result.score) {
+                updateTestProgress(testType as keyof typeof progressData.testTypes, test.testId, {
+                  status: 'completed',
+                  score: result.score,
+                  timeSpent: result.timeTaken,
+                  attempts: (test.attempts || 0) + 1,
+                  lastAttempted: new Date().toISOString().split('T')[0]
+                });
+              }
+              // Clean up the result
+              localStorage.removeItem(resultKey);
+            } catch (error) {
+              console.error('Error parsing test result:', error);
+            }
+          }
+        });
+      });
+    };
+
+    checkTestCompletions();
+  }, [progressData.testTypes, updateTestProgress]);
+
+  // Refresh test data when window regains focus (user returns from test window)
+  useEffect(() => {
+    const handleFocus = () => {
+      // Recheck for test completions when user comes back
+      Object.keys(progressData.testTypes).forEach((testType) => {
+        const tests = progressData.testTypes[testType as keyof typeof progressData.testTypes];
+        tests.forEach((test) => {
+          const resultKey = `test_result_${test.testId}`;
+          const resultStr = localStorage.getItem(resultKey);
+          if (resultStr) {
+            try {
+              const result = JSON.parse(resultStr);
+              if (test.status !== 'completed' || test.score !== result.score) {
+                updateTestProgress(testType as keyof typeof progressData.testTypes, test.testId, {
+                  status: 'completed',
+                  score: result.score,
+                  timeSpent: result.timeTaken,
+                  attempts: (test.attempts || 0) + 1,
+                  lastAttempted: new Date().toISOString().split('T')[0]
+                });
+              }
+              localStorage.removeItem(resultKey);
+            } catch (error) {
+              console.error('Error parsing test result:', error);
+            }
+          }
+        });
+      });
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [progressData.testTypes, updateTestProgress]);
 
   // Update progress data with exam name
   useEffect(() => {
