@@ -6,7 +6,7 @@ import SubjectSelection from '@/components/student/zero-to-hero/SubjectSelection
 import DailyPlan from '@/components/student/zero-to-hero/DailyPlan';
 import ProgressDashboard from '@/components/student/zero-to-hero/ProgressDashboard';
 import RewardsSection from '@/components/student/zero-to-hero/RewardsSection';
-import PeerStudy from '@/components/student/zero-to-hero/PeerStudy';
+
 import FeedbackAI from '@/components/student/zero-to-hero/FeedbackAI';
 import CompletionCertificate from '@/components/student/zero-to-hero/CompletionCertificate';
 import { useZeroToHero } from '@/hooks/useZeroToHero';
@@ -94,9 +94,7 @@ const ZeroToHero = () => {
               <TabsTrigger value="rewards" className="flex-1 min-w-[100px] data-[state=active]:bg-yellow-50 data-[state=active]:text-yellow-700">
                 Rewards
               </TabsTrigger>
-              <TabsTrigger value="peer" className="flex-1 min-w-[100px] data-[state=active]:bg-green-50 data-[state=active]:text-green-700">
-                Peer Study
-              </TabsTrigger>
+
               <TabsTrigger value="feedback" className="flex-1 min-w-[100px] data-[state=active]:bg-pink-50 data-[state=active]:text-pink-700">
                 AI Feedback
               </TabsTrigger>
@@ -114,9 +112,7 @@ const ZeroToHero = () => {
               <RewardsSection />
             </TabsContent>
 
-            <TabsContent value="peer" className="space-y-6">
-              <PeerStudy />
-            </TabsContent>
+
 
             <TabsContent value="feedback" className="space-y-6">
               <FeedbackAI />

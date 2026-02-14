@@ -36,6 +36,7 @@ import NotFound from '@/pages/NotFound';
 import ExamWindow from '@/pages/student/ExamWindow';
 
 import TestWindow from '@/pages/student/TestWindow';
+import TeamStudy from '@/pages/student/TeamStudy';
 
 const StudentRoutes = () => {
   return (
@@ -72,8 +73,7 @@ const StudentRoutes = () => {
           <Route path="/current-affairs/date/:date" element={<DailyNewsPage />} />
           <Route path="/daily-quizzes" element={<DailyQuizzes />} />
 
-          <Route path="/performance" element={<PerformanceAnalytics />} />
-          <Route path="/zero-to-hero" element={<ZeroToHero />} />
+          <Route path="/team-study" element={<TeamStudy />} />
           <Route path="/exam-notifications" element={<ExamNotifications />} />
           <Route path="/self-care" element={<SelfCare />} />
           <Route path="/pdf-courses" element={<PDFCourses />} />

@@ -61,6 +61,11 @@ const menuItems = [
     icon: TrendingUpDown,
   },
   {
+    title: 'Team Study',
+    url: '/student/team-study',
+    icon: Users,
+  },
+  {
     title: 'Tests',
     url: '/student/tests',
     icon: FileText,
